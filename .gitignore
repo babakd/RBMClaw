@@ -1,3 +1,8 @@
 .env
 .DS_Store
-openclaw-android/.kotlin/
+.gradle/
+.kotlin/
+**/build/
+local.properties
+.idea/
+**/*.iml

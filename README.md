@@ -8,12 +8,11 @@ Notes:
 - Supports modern Android only (`minSdk 31`, Kotlin + Jetpack Compose).
 
 ## Open in Android Studio
-- Open the folder `apps/android`.
+- Open the repository root folder.
 
 ## Build / Run
 
 ```bash
-cd apps/android
 ./gradlew :app:assembleDebug
 ./gradlew :app:installDebug
 ./gradlew :app:testDebugUnitTest
