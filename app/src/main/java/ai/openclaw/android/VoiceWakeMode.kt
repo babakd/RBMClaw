@@ -8,7 +8,7 @@ enum class VoiceWakeMode(val rawValue: String) {
 
   companion object {
     fun fromRawValue(raw: String?): VoiceWakeMode {
-      return entries.firstOrNull { it.rawValue == raw?.trim()?.lowercase() } ?: Foreground
+      return entries.firstOrNull { it.rawValue == raw?.trim()?.lowercase() } ?: Off
     }
   }
 }

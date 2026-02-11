@@ -20,6 +20,7 @@ class SecurePrefs(context: Context) {
     val defaultWakeWords: List<String> = listOf("openclaw", "claude")
     private const val displayNameKey = "node.displayName"
     private const val voiceWakeModeKey = "voiceWake.mode"
+    private const val voiceWakeModeUserSetKey = "voiceWake.mode.userSet"
   }
 
   private val appContext = context.applicationContext
@@ -241,7 +242,10 @@ class SecurePrefs(context: Context) {
   }
 
   fun setVoiceWakeMode(mode: VoiceWakeMode) {
-    prefs.edit { putString(voiceWakeModeKey, mode.rawValue) }
+    prefs.edit {
+      putString(voiceWakeModeKey, mode.rawValue)
+      putBoolean(voiceWakeModeUserSetKey, true)
+    }
     _voiceWakeMode.value = mode
   }
 
@@ -267,13 +271,20 @@ class SecurePrefs(context: Context) {
 
   private fun loadVoiceWakeMode(): VoiceWakeMode {
     val raw = prefs.getString(voiceWakeModeKey, null)
-    val resolved = VoiceWakeMode.fromRawValue(raw)
+    val userSet = prefs.getBoolean(voiceWakeModeUserSetKey, false)
 
-    // Default ON (foreground) when unset.
+    // Safety default: keep Voice Wake off until user explicitly enables it.
+    if (!userSet) {
+      if (raw != VoiceWakeMode.Off.rawValue) {
+        prefs.edit { putString(voiceWakeModeKey, VoiceWakeMode.Off.rawValue) }
+      }
+      return VoiceWakeMode.Off
+    }
+
+    val resolved = VoiceWakeMode.fromRawValue(raw)
     if (raw.isNullOrBlank()) {
       prefs.edit { putString(voiceWakeModeKey, resolved.rawValue) }
     }
-
     return resolved
   }
 

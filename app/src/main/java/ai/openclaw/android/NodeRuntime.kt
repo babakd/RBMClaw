@@ -328,21 +328,34 @@ class NodeRuntime(context: Context) {
         isForeground,
         externalAudioCaptureActive,
         wakeWords,
-      ) { mode, foreground, externalAudio, words ->
-        Quad(mode, foreground, externalAudio, words)
+        isConnected,
+      ) { mode, foreground, externalAudio, words, connected ->
+        VoiceWakeInputs(
+          mode = mode,
+          foreground = foreground,
+          externalAudio = externalAudio,
+          wakeWords = words,
+          connected = connected,
+        )
       }.distinctUntilChanged()
-        .collect { (mode, foreground, externalAudio, words) ->
-          voiceWake.setTriggerWords(words)
+        .collect { inputs ->
+          voiceWake.setTriggerWords(inputs.wakeWords)
 
           val shouldListen =
-            when (mode) {
+            inputs.connected && when (inputs.mode) {
               VoiceWakeMode.Off -> false
-              VoiceWakeMode.Foreground -> foreground
+              VoiceWakeMode.Foreground -> inputs.foreground
               VoiceWakeMode.Always -> true
-            } && !externalAudio
+            } && !inputs.externalAudio
 
           if (!shouldListen) {
-            voiceWake.stop(statusText = if (mode == VoiceWakeMode.Off) "Off" else "Paused")
+            val pausedReason =
+              when {
+                inputs.mode == VoiceWakeMode.Off -> "Off"
+                !inputs.connected -> "Gateway offline"
+                else -> "Paused"
+              }
+            voiceWake.stop(statusText = pausedReason)
             return@collect
           }
 
@@ -1336,6 +1349,13 @@ class NodeRuntime(context: Context) {
 }
 
 private data class Quad<A, B, C, D>(val first: A, val second: B, val third: C, val fourth: D)
+private data class VoiceWakeInputs(
+  val mode: VoiceWakeMode,
+  val foreground: Boolean,
+  val externalAudio: Boolean,
+  val wakeWords: List<String>,
+  val connected: Boolean,
+)
 
 private data class RbmStreamInputs(
   val enabled: Boolean,
