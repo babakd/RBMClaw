@@ -11,12 +11,6 @@ android {
   namespace = "ai.openclaw.android"
   compileSdk = 36
 
-  sourceSets {
-    getByName("main") {
-      assets.srcDir(file("../../shared/OpenClawKit/Sources/OpenClawKit/Resources"))
-    }
-  }
-
   defaultConfig {
     applicationId = "ai.openclaw.android"
     minSdk = 31
